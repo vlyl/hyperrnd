@@ -248,7 +248,7 @@ export function DeploymentGuide({
                 <span>⚡</span> 区块速度：1s（快速）/ 1 分钟（慢速）
               </div>
               <div className="flex items-center gap-1.5">
-                <span>🏛️</span> ~21 个验证者（HyperBFT 共识）
+                <span>🏛️</span> ~24 个验证者（HyperBFT 共识）
               </div>
               <div className="flex items-center gap-1.5">
                 <span>⚠️</span> block.prevrandao 在此链上不安全

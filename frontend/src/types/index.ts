@@ -46,7 +46,7 @@ export const RNG_METHODS: RNGMethod[] = [
     attackVectors: [
       "⚠️ 验证者可选择性不出块来重新抽取 prevrandao",
       "⚠️ 攻击者合约可预览结果并在不利时 revert",
-      "⚠️ HyperEVM 只有 ~21 个验证者，攻击成本极低",
+      "⚠️ HyperEVM 只有 ~24 个验证者，攻击成本极低",
       "⚠️ MEV 机器人可读取待定交易后前运行",
     ],
     latency: "即时（同一交易）",
@@ -61,12 +61,12 @@ export const RNG_METHODS: RNGMethod[] = [
     shortName: "Commit-Reveal",
     securityLevel: "medium",
     securityScore: 5,
-    description: "两阶段承诺揭示方案：双方都提交随机种子哈希，再揭示",
+    description: "庄家预先承诺 serverSeedHash，玩家提交明文 userSeed（合约内部哈希保存），庄家揭示结算",
     howItWorks: [
-      "阶段1 (Commit): 玩家提交 hash(userSeed) + 猜测 + 押注",
+      "阶段1 (Commit): 玩家提交明文 userSeed + 猜测 + 押注（合约内部哈希存储）",
       "庄家已预先提交 serverSeedHash（在接受押注前）",
-      "阶段2 (Reveal): 庄家揭示 serverSeed，玩家揭示 userSeed",
-      "结果 = hash(serverSeed XOR userSeed XOR blockhash)",
+      "阶段2 (Reveal): 庄家揭示 serverSeed，合约验证双方承诺后结算",
+      "结果 = hash(serverSeed, userSeed, blockhash, player)",
     ],
     attackVectors: [
       "⚠️ 庄家可能拒绝揭示（输局时卷款跑路）",
@@ -96,7 +96,7 @@ export const RNG_METHODS: RNGMethod[] = [
     attackVectors: [
       "✅ 用户和提供商均无法单独控制输出",
       "✅ 提供商种子在用户请求前已承诺",
-      "✅ 链上可验证 VRF 证明",
+      "⚠️ 承诺哈希可审计（非完整链上 VRF 证明）",
       "⚠️ 需要信任 Pyth 网络基础设施",
     ],
     latency: "异步（1-3 秒）",

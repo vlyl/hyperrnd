@@ -6,7 +6,7 @@ pragma solidity ^0.8.24;
 /// @dev Uses block.prevrandao, block.timestamp, blockhash — all manipulable by validators
 ///
 /// ATTACK VECTORS:
-/// 1. Validator Withholding: Any of ~21 HyperEVM validators can withhold blocks to reroll prevrandao
+/// 1. Validator Withholding: Any of ~24 HyperEVM validators can withhold blocks to reroll prevrandao
 /// 2. Revert-if-unfavorable: Attacker wraps call in contract, reverts if outcome is bad
 /// 3. Read-then-call: Attacker reads block state and front-runs favorable bets
 ///
@@ -84,7 +84,7 @@ contract BlockRandomnessDice {
 
         // ⚠️ INSECURE: Using block variables as randomness source
         // All of these can be known/manipulated before tx inclusion:
-        // - block.prevrandao: Not from a secure beacon on HyperEVM (~21 validators)
+        // - block.prevrandao: Not from a secure beacon on HyperEVM (~24 validators)
         // - block.timestamp: Manipulable by proposer within ~1s window
         // - block.number: Completely predictable
         // - msg.sender: Controlled by attacker

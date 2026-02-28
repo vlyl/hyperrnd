@@ -178,7 +178,16 @@ contract PythEntropyDice is IEntropyConsumer {
 
         if (game.state != GameState.PENDING) revert GameAlreadyProcessed();
 
-        uint256 result = (uint256(randomNumber) % SIDES) + 1;
+        // Domain-separated derivation: combines Pyth randomness with per-game context
+        // so each game has a unique output even if sequence numbers were somehow correlated.
+        uint256 derived = uint256(keccak256(abi.encodePacked(
+            randomNumber,
+            sequenceNumber,
+            game.player,
+            gameId,
+            address(this)
+        )));
+        uint256 result = (derived % SIDES) + 1;
         bool won = (result == game.guess);
 
         game.state = GameState.COMPLETED;

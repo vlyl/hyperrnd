@@ -5,8 +5,8 @@ pragma solidity ^0.8.24;
 /// @notice 🟡 MEDIUM SECURITY: Classic two-phase commit-reveal randomness scheme
 /// @dev
 /// HOW IT WORKS:
-///   Phase 1 (Player Commit): Player sends hash(userSeed) + guess + bet
-///   Phase 2 (House Reveal):  House reveals serverSeed (pre-committed hash published)
+///   Phase 1 (Player Commit): Player sends plaintext userSeed + guess + bet (contract hashes internally)
+///   Phase 2 (House Reveal):  House reveals serverSeed; contract verifies both commitments and settles
 ///   Result: keccak256(serverSeed XOR userSeed XOR blockhash) % 6 + 1
 ///
 /// TRUST MODEL:

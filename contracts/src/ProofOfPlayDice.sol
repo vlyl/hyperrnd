@@ -164,7 +164,16 @@ contract ProofOfPlayDice is IVRNGConsumer {
         if (game.player == address(0)) revert GameNotFound();
         if (game.state != GameState.PENDING) revert GameAlreadyProcessed();
 
-        uint256 result = (randomNumber % SIDES) + 1;
+        // Domain-separated derivation: prevents correlation between games sharing the same
+        // drand round (~3s window). Each game gets a unique hash even with same randomNumber.
+        uint256 derived = uint256(keccak256(abi.encodePacked(
+            randomNumber,
+            requestId,
+            game.player,
+            gameId,
+            address(this)
+        )));
+        uint256 result = (derived % SIDES) + 1;
         bool won = (result == game.guess);
 
         game.state = GameState.COMPLETED;

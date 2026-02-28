@@ -86,7 +86,7 @@ result = keccak256(block.prevrandao, block.timestamp, block.number, msg.sender) 
 ```
 
 **攻击方式**:
-- HyperEVM 只有 ~21 个验证者，任何验证者可以不出块来重新抽取 `prevrandao`
+- HyperEVM 只有 ~24 个验证者，任何验证者可以不出块来重新抽取 `prevrandao`
 - 攻击者合约可以在同一交易中预览结果，不利时 `revert`（无成本重试）
 - 前端有攻击模拟器演示此漏洞
 
@@ -157,7 +157,7 @@ make test
 | Chain ID | 999 | 998 |
 | RPC | `https://rpc.hyperliquid.xyz/evm` | `https://rpc.hyperliquid-testnet.xyz/evm` |
 | 区块速度 | 1s (fast) / 1min (slow) | 同上 |
-| 验证者数量 | ~21 | - |
+| 验证者数量 | ~24 | - |
 | Gas Token | HYPE | HYPE |
 
 ## 安全结论
@@ -169,4 +169,4 @@ make test
 | Pyth Entropy | ✅ 推荐 | ~1-3s | entropy fee |
 | Proof of Play vRNG | ✅ 推荐 | ~1-3s | 免费（需注册） |
 
-**核心原则**: 在 HyperEVM 上开发任何有价值的随机性应用，必须使用 Pyth Entropy 或 Proof of Play vRNG。`block.prevrandao` 在 HyperEVM 上不安全，因为验证者数量极少（~21），操控成本极低。
+**核心原则**: 在 HyperEVM 上开发任何有价值的随机性应用，必须使用 Pyth Entropy 或 Proof of Play vRNG。`block.prevrandao` 在 HyperEVM 上不安全，因为验证者数量极少（~24），操控成本极低。

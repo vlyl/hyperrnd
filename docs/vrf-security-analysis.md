@@ -39,10 +39,10 @@
 
 | 参数 | Ethereum Mainnet | HyperEVM |
 |------|-----------------|----------|
-| 验证者数量 | ~500,000 | ~21 |
+| 验证者数量 | ~500,000 | ~24（截至 2026-02） |
 | 共识机制 | Ethereum PoS | HyperBFT (HotStuff) |
 | prevrandao 来源 | Beacon RANDAO (BLS aggregate) | 未文档化（非 RANDAO） |
-| 单验证者出块概率 | ~0.0002% | ~4.8% |
+| 单验证者出块概率 | ~0.0002% | ~4.2% |
 | 操控 prevrandao 成本 | 损失约 16+ ETH + 惩罚 | 损失 1 次出块奖励 |
 | 出块时间 | 12 秒 | 1 秒（fast blocks） |
 
@@ -94,7 +94,7 @@ contract Attacker {
 
 ### 2.1 密码学基础
 
-Pyth Entropy 实现了**双方承诺-揭示协议（Dual Commit-Reveal Protocol）**，结合椭圆曲线可验证随机函数（ECVRF）。
+Pyth Entropy 实现了**双方承诺-揭示协议（Dual Commit-Reveal Protocol）**。按官方协议设计，Provider 种子通过链上哈希承诺可审计，随机性可验证；但并非每次请求均在链上提交完整 ECVRF 证明。
 
 #### 核心密码学原语
 
@@ -103,9 +103,9 @@ Pyth Entropy 实现了**双方承诺-揭示协议（Dual Commit-Reveal Protocol�
 - 单向性（Preimage Resistance）：给定 H(x)，找到 x 计算不可行
 - 用途：承诺方案的绑定性保证
 
-**椭圆曲线 VRF（ECVRF，RFC 9381）**：
+**可验证随机函数（VRF）原理参考**（Pyth 采用双承诺可审计协议，而非 per-request 链上 ECVRF 证明）：
 
-ECVRF 满足三个关键属性：
+VRF 满足三个关键属性：
 1. **正确性（Correctness）**：合法生成的证明总能通过验证
 2. **唯一性（Uniqueness）**：对于给定的私钥和输入，输出唯一
 3. **伪随机性（Pseudorandomness）**：不知道私钥的情况下，输出看起来随机
@@ -652,10 +652,10 @@ forge script script/Deploy.s.sol:DeployLocal \
 
 | 维度 | Pyth Entropy | Proof of Play vRNG |
 |------|-------------|-------------------|
-| **密码学基础** | ECVRF + Dual Commit-Reveal | 阈值 BLS + Shamir 秘密分享 |
+| **密码学基础** | 双方承诺揭示协议（Dual Commit-Reveal） | 阈值 BLS + Shamir 秘密分享 |
 | **信任假设** | 1-of-2（Provider 和 User 各一方诚实） | t-of-n（LoE 大多数机构诚实） |
 | **去中心化程度** | 中（依赖 Pyth 网络 Guardian 节点） | 高（16+ 独立机构） |
-| **链上可验证性** | ✅ ECVRF 证明可验证 | ⚠️ 需要 BLS 预编译（高 gas）|
+| **链上可验证性** | ⚠️ 承诺哈希可审计（非完整链上 VRF 证明） | ⚠️ 需要 BLS 预编译（高 gas）|
 | **延迟** | ~1-3 秒（异步回调） | ~1-3 秒（异步回调） |
 | **使用成本** | entropy fee（小额） | 免费（需注册白名单）|
 | **HyperEVM 合约** | 查询 entropy-explorer.pyth.network | 0x9eC728Fce50c77e0BeF7d34F1ab28a46409b7aF1 |

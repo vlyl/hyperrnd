@@ -167,8 +167,8 @@ export function CommitRevealDemo({ contractAddress, signer, onRefreshBalance }: 
           <div>
             <div className="font-bold text-yellow-300 mb-1">中等安全：两阶段承诺揭示</div>
             <div className="text-sm text-yellow-200/70">
-              玩家和庄家都提交随机种子的哈希，双方均无法单独预测结果。
-              主要风险是庄家拒绝揭示（有超时保护机制）。
+              庄家预先承诺 serverSeedHash，玩家提交明文 userSeed（合约内部哈希）。
+              庄家揭示后双方种子合并结算；主要风险是庄家拒绝揭示（有超时保护机制）。
             </div>
           </div>
         </div>

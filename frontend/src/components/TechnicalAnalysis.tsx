@@ -150,10 +150,10 @@ function ThreatTable({ rows }: { rows: string[][] }) {
 
 function CompareTable() {
   const rows = [
-    ["密码学基础", "ECVRF + 双方承诺揭示", "阈值 BLS + Shamir 秘密分享"],
+    ["密码学基础", "双方承诺揭示协议", "阈值 BLS + Shamir 秘密分享"],
     ["信任假设", "1-of-2（双方至少一方诚实）", "t-of-n（LoE 大多数机构诚实）"],
     ["去中心化程度", "中（Pyth Guardian 网络）", "高（16+ 独立跨国机构）"],
-    ["链上可验证性", "✅ ECVRF 证明可验证", "⚠️ 需 BLS 预编译（高 gas）"],
+    ["链上可验证性", "⚠️ 承诺哈希可审计（非完整链上 VRF 证明）", "⚠️ 需 BLS 预编译（高 gas）"],
     ["响应延迟", "~1–3 秒异步回调", "~1–3 秒异步回调"],
     ["使用成本", "entropy fee（小额）", "当前免费（需注册）"],
     ["HyperEVM 合约", "查 entropy-explorer.pyth.network", "0x9eC728Fce50c77e0BeF7d34F1ab28a46409b7aF1"],
@@ -455,7 +455,7 @@ export function TechnicalAnalysis() {
               { label: "Pyth Entropy", color: "bg-green-900/40 text-green-300 border-green-500/30" },
               { label: "Proof of Play vRNG", color: "bg-green-900/40 text-green-300 border-green-500/30" },
               { label: "drand (League of Entropy)", color: "bg-blue-900/40 text-blue-300 border-blue-500/30" },
-              { label: "ECVRF (RFC 9381)", color: "bg-purple-900/40 text-purple-300 border-purple-500/30" },
+              { label: "双方承诺揭示协议", color: "bg-purple-900/40 text-purple-300 border-purple-500/30" },
               { label: "阈值 BLS 签名", color: "bg-purple-900/40 text-purple-300 border-purple-500/30" },
             ].map((tag) => (
               <span key={tag.label} className={`px-3 py-1 rounded-full text-xs border ${tag.color}`}>
@@ -499,7 +499,7 @@ export function TechnicalAnalysis() {
                 </thead>
                 <tbody>
                   {[
-                    ["验证者数量", "~500,000", "~21"],
+                    ["验证者数量", "~500,000", "~24"],
                     ["共识机制", "Ethereum PoS (Gasper)", "HyperBFT (HotStuff 变体)"],
                     ["prevrandao 来源", "Beacon RANDAO (BLS 聚合签名)", "未文档化（非 RANDAO）"],
                     ["单验证者出块概率", "~0.0002%", "~4.8%"],
@@ -509,7 +509,7 @@ export function TechnicalAnalysis() {
                     <tr key={a} className="border-b border-casino-border/50">
                       <td className="py-2 px-3 text-gray-300 font-medium">{a}</td>
                       <td className="py-2 px-3 text-gray-400">{b}</td>
-                      <td className={`py-2 px-3 font-medium ${c.includes("21") || c.includes("4.8") || c.includes("1 次") || c.includes("1 秒") ? "text-red-400" : "text-gray-400"}`}>{c}</td>
+                      <td className={`py-2 px-3 font-medium ${c.includes("24") || c.includes("4.2") || c.includes("1 次") || c.includes("1 秒") ? "text-red-400" : "text-gray-400"}`}>{c}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -517,7 +517,7 @@ export function TechnicalAnalysis() {
             </div>
 
             <Callout type="danger" title="核心风险">
-              HyperEVM 只有约 21 个验证者，任意一个验证者都有约 4.8% 的概率成为某个区块的提议者。
+              HyperEVM 只有约 24 个验证者，任意一个验证者都有约 4.2% 的概率成为某个区块的提议者。
               攻击成本极低：只需放弃一次出块奖励，就可以获得针对大额赌注游戏的随机数操控权。
             </Callout>
           </Section>
@@ -605,8 +605,8 @@ contract BlockRNGAttacker {
             <H2>密码学基础</H2>
 
             <p className="text-gray-400 text-sm leading-relaxed mb-4">
-              Pyth Entropy 实现了<strong className="text-white">双方承诺-揭示协议（Dual Commit-Reveal Protocol）</strong>，
-              结合椭圆曲线可验证随机函数（ECVRF，RFC 9381）。
+              Pyth Entropy 实现了<strong className="text-white">双方承诺-揭示协议（Dual Commit-Reveal Protocol）</strong>。
+              按官方协议设计，Provider 种子通过链上哈希承诺可审计；并非每次请求均在链上提交完整 ECVRF 证明。
             </p>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
@@ -622,7 +622,7 @@ contract BlockRNGAttacker {
                 },
                 {
                   icon: "📏",
-                  title: "ECVRF (RFC 9381)",
+                  title: "VRF 原理（参考）",
                   props: [
                     ["正确性", "合法生成的证明总能通过验证"],
                     ["唯一性", "给定 sk 和输入，输出唯一确定"],
@@ -647,7 +647,7 @@ contract BlockRNGAttacker {
               ))}
             </div>
 
-            <MathBlock>{`ECVRF 核心构造（基于 DLEQ Schnorr 证明）：
+            <MathBlock>{`VRF 核心构造参考（ECVRF，RFC 9381）：
 
 给定：椭圆曲线 E，基点 G，私钥 sk，公钥 pk = sk·G
 

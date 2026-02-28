@@ -137,7 +137,7 @@ export function SecurityMatrix() {
         </h3>
         <ul className="text-sm text-gray-400 space-y-1">
           <li>
-            • HyperEVM 只有 <strong className="text-white">~21 个验证者</strong>，
+            • HyperEVM 只有 <strong className="text-white">~24 个验证者</strong>，
             validator 操控 prevrandao 的成本极低
           </li>
           <li>
