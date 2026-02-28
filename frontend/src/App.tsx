@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useWeb3 } from "./hooks/useWeb3";
 import { SecurityMatrix } from "./components/SecurityMatrix";
 import { BlockRandomnessDemo } from "./components/BlockRandomnessDemo";
@@ -10,6 +10,33 @@ import { DeploymentGuide } from "./components/DeploymentGuide";
 import { RNG_METHODS } from "./types";
 import { NETWORKS } from "./contracts/addresses";
 import type { Deployments } from "./contracts/addresses";
+
+type MainSection = "demo" | "deploy" | "docs";
+type DemoTab = "block" | "commit" | "pyth" | "pop";
+type DocsTab = "overview" | "tech";
+
+// ── Hash-based routing helpers ──────────────────────────────────────────────
+// URL scheme: #section[/subtab]  e.g. #docs/tech  #demo/pyth  #deploy
+function parseHash(): { section: MainSection; demoTab: DemoTab; docsTab: DocsTab } {
+  const hash = window.location.hash.replace(/^#\/?/, ""); // strip leading #/
+  const [seg1, seg2] = hash.split("/");
+  const section: MainSection =
+    seg1 === "deploy" ? "deploy" :
+    seg1 === "docs"   ? "docs"   : "demo";
+  const demoTab: DemoTab =
+    (["block", "commit", "pyth", "pop"] as DemoTab[]).includes(seg2 as DemoTab)
+      ? (seg2 as DemoTab)
+      : "block";
+  const docsTab: DocsTab =
+    seg2 === "tech" ? "tech" : "overview";
+  return { section, demoTab, docsTab };
+}
+
+function buildHash(section: MainSection, demoTab: DemoTab, docsTab: DocsTab): string {
+  if (section === "demo")   return `#demo/${demoTab}`;
+  if (section === "deploy") return `#deploy`;
+  return `#docs/${docsTab}`;
+}
 
 async function loadDeployments(chainId: number): Promise<Deployments | null> {
   if (chainId === 31337) {
@@ -23,10 +50,6 @@ async function loadDeployments(chainId: number): Promise<Deployments | null> {
   }
   return null;
 }
-
-type MainSection = "demo" | "deploy" | "docs";
-type DemoTab = "block" | "commit" | "pyth" | "pop";
-type DocsTab = "overview" | "tech";
 
 const MAIN_SECTIONS: { id: MainSection; label: string; icon: string }[] = [
   { id: "demo",   label: "演示 Demo", icon: "🎮" },
@@ -48,10 +71,33 @@ const DOCS_TABS: { id: DocsTab; label: string; icon: string }[] = [
 
 export default function App() {
   const web3 = useWeb3();
-  const [section, setSection]     = useState<MainSection>("demo");
-  const [demoTab, setDemoTab]     = useState<DemoTab>("block");
-  const [docsTab, setDocsTab]     = useState<DocsTab>("overview");
+
+  // Initialise from URL hash so direct links / refreshes work
+  const initial = parseHash();
+  const [section, setSection]     = useState<MainSection>(initial.section);
+  const [demoTab, setDemoTab]     = useState<DemoTab>(initial.demoTab);
+  const [docsTab, setDocsTab]     = useState<DocsTab>(initial.docsTab);
   const [deployments, setDeployments] = useState<Deployments | null>(null);
+
+  // Keep URL in sync whenever nav state changes
+  useEffect(() => {
+    const newHash = buildHash(section, demoTab, docsTab);
+    if (window.location.hash !== newHash) {
+      window.history.pushState(null, "", newHash);
+    }
+  }, [section, demoTab, docsTab]);
+
+  // Sync state when user presses back/forward
+  useEffect(() => {
+    const onHashChange = () => {
+      const { section: s, demoTab: d, docsTab: t } = parseHash();
+      setSection(s);
+      setDemoTab(d);
+      setDocsTab(t);
+    };
+    window.addEventListener("hashchange", onHashChange);
+    return () => window.removeEventListener("hashchange", onHashChange);
+  }, []);
 
   useEffect(() => {
     if (web3.chainId) {
@@ -64,10 +110,10 @@ export default function App() {
   const isUnsupportedNetwork = !!web3.address && !!web3.chainId && !NETWORKS[web3.chainId];
 
   // Navigate to a demo tab (also switches to demo section)
-  const goToDemo = (tab: DemoTab) => {
+  const goToDemo = useCallback((tab: DemoTab) => {
     setSection("demo");
     setDemoTab(tab);
-  };
+  }, []);
 
   return (
     <div className="min-h-screen bg-casino-dark text-white">
